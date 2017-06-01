@@ -1,0 +1,103 @@
+There are currently 4 message type defined ...
+
+
+1. UDP message segments
+
+       
+   
+  Replica number (R): 1 byte
+
+    Each address which the encoder pushes to should be given a
+    different replica number.
+
+  Stream UUID: 16 bytes
+
+    Random value which uniquely identifies this encoded stream
+
+  Sequence No.: 8 bytes
+
+    64 bit integer sequence number, monotonically increasing with each
+    successive message segment
+
+
+
+
+
+1.1.  DATA segment:
+                                       
+   0                   1                   2                   3   
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |0|R|        Stream UUID            | Sequence No.  | ADTS data ....
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+  ADTS data:
+
+    Raw ADTS stream data.
+
+
+
+1.2.  Metadata segment
+
+    Should be sent whenever Icecast metadata needs to be updated.
+
+   0                   1                   2                   3   
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |1|R|        Stream UUID            | Sequence No.  | ICY Metadata ....
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+  ICY Metadata:
+
+    Icecast metadata, unpadded ASCII/Latin1.
+
+
+1.3.  Announcement segment:
+
+  Announcement describing the type of stream (T; 1 byte) and stream
+  name (ASCII). Should be sent periodically, eg. every few seconds.
+
+   0                   1                   2                   3   
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |2|R|        Stream UUID            | Sequence No.  |T| Name ....
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+  Audio stream types:
+
+   0: ADTS AAC Stereo 44.1KHz 48Kbps
+   1: ADTS MP3 Stereo 44.1KHz 128Kbps
+   2: ADTS AAC Stereo 44.1KHz 192Kbps
+   3: ADTS AAC Stereo 44.1KHz 128Kbps
+   4: ADTS MP3 Mono   44.1KHz 48Kbps
+   5: ADTS AAC Stereo 44.1KHz 24Kbps
+
+
+
+1.4.  Headers segment:
+
+    Headers:
+    
+    HTTP headers represented as Key/value pairs (key and value
+    deliminated with "\r") deliminated with "\n".
+
+    Eg.: "Icy-Name\rCapital FM\nIcy-Genre\rPop"
+
+   0                   1                   2                   3   
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |3|R|        Stream UUID            | Sequence No.  | Headers...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+
+2. TCP stream
+
+  The TCP stream consist of a high and low byte for the length of the
+  PDU followed by the PDU as-per the UDP protocol above.
+
+   0                   1                   2                   3   
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |H|L|        PDU ...                                    |H|L|....
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
